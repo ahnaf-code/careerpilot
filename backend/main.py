@@ -72,5 +72,5 @@ async def chat(request: ChatRequest):
 
     client = google_genai.Client(api_key=GEMINI_API_KEY)
     full_prompt = f"You are a career assistant. The user's CV is: {cv_text}. Answer based on this CV only.\n\nUser question: {request.message}"
-    response = client.models.generate_content(model="gemini-2.0-flash-lite", contents=full_prompt)
+    response = client.models.generate_content(model="gemini-2.0-flash", contents=full_prompt)
     return {"reply": response.text}
