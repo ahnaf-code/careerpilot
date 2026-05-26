@@ -1,6 +1,8 @@
 import io
 import os
 import uuid
+from datetime import datetime
+from pathlib import Path
 from typing import Dict
 
 from google import genai as google_genai
@@ -10,6 +12,8 @@ import requests
 from fastapi import FastAPI, File, HTTPException, Query, UploadFile
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
+from sqlalchemy import Column, DateTime, Integer, String, create_engine
+from sqlalchemy.orm import Session, declarative_base, sessionmaker
 
 load_dotenv()
 
@@ -27,15 +31,93 @@ app.add_middleware(
 
 cv_store: Dict[str, str] = {}
 
+DATABASE_PATH = Path(__file__).resolve().parent / "careerpilot.db"
+engine = create_engine(
+    f"sqlite:///{DATABASE_PATH}",
+    connect_args={"check_same_thread": False},
+)
+SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
+Base = declarative_base()
+
+
+class Application(Base):
+    __tablename__ = "applications"
+
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    title = Column(String, nullable=False)
+    company = Column(String, nullable=False)
+    status = Column(String, nullable=False, default="Applied")
+    created_at = Column(DateTime, nullable=False, default=datetime.utcnow)
+
+
+Base.metadata.create_all(bind=engine)
+
 
 class ChatRequest(BaseModel):
     cv_id: str
     message: str
 
 
+class TrackerCreate(BaseModel):
+    title: str
+    company: str
+
+
+class TrackerStatusUpdate(BaseModel):
+    status: str
+
+
 @app.get("/health")
 def health():
     return {"status": "ok"}
+
+
+@app.post("/api/tracker")
+def create_tracker_application(body: TrackerCreate):
+    db: Session = SessionLocal()
+    try:
+        application = Application(title=body.title, company=body.company)
+        db.add(application)
+        db.commit()
+        db.refresh(application)
+        return {"ok": True, "id": application.id}
+    finally:
+        db.close()
+
+
+@app.get("/api/tracker")
+def list_tracker_applications():
+    db: Session = SessionLocal()
+    try:
+        applications = db.query(Application).order_by(Application.created_at.desc()).all()
+        return {
+            "applications": [
+                {
+                    "id": app.id,
+                    "title": app.title,
+                    "company": app.company,
+                    "status": app.status,
+                    "created_at": app.created_at.isoformat() if app.created_at else None,
+                }
+                for app in applications
+            ]
+        }
+    finally:
+        db.close()
+
+
+@app.patch("/api/tracker/{id}")
+def update_tracker_application(id: int, body: TrackerStatusUpdate):
+    db: Session = SessionLocal()
+    try:
+        application = db.query(Application).filter(Application.id == id).first()
+        if application is None:
+            raise HTTPException(status_code=404, detail="Application not found")
+        application.status = body.status
+        db.commit()
+        return {"ok": True}
+    finally:
+        db.close()
 
 
 @app.get("/api/jobs")

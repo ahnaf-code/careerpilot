@@ -4,3 +4,4 @@ requests
 python-dotenv
 pdfplumber
 google-generativeai
+sqlalchemy
