@@ -6,6 +6,7 @@ from datetime import datetime
 from pathlib import Path
 from typing import Dict
 
+import chromadb
 from google import genai as google_genai
 import pdfplumber
 from dotenv import load_dotenv
@@ -31,6 +32,42 @@ app.add_middleware(
 )
 
 cv_store: Dict[str, str] = {}
+
+CHROMA_PATH = Path(__file__).resolve().parent / "chroma_data"
+CHUNK_SIZE = 500
+_chroma_client = chromadb.PersistentClient(path=str(CHROMA_PATH))
+_cv_chunks_collection = _chroma_client.get_or_create_collection(name="cv_chunks")
+
+
+def _chunk_cv_text(text: str, chunk_size: int = CHUNK_SIZE) -> list[str]:
+    text = text.strip()
+    if not text:
+        return []
+    return [text[i : i + chunk_size] for i in range(0, len(text), chunk_size)]
+
+
+def _index_cv_chunks(cv_id: str, cv_text: str) -> None:
+    chunks = _chunk_cv_text(cv_text)
+    if not chunks:
+        return
+    _cv_chunks_collection.add(
+        ids=[f"{cv_id}_{i}" for i in range(len(chunks))],
+        documents=chunks,
+        metadatas=[{"cv_id": cv_id} for _ in chunks],
+    )
+
+
+def _retrieve_cv_chunks(cv_id: str, query: str, n_results: int = 3) -> list[str]:
+    results = _cv_chunks_collection.query(
+        query_texts=[query],
+        n_results=n_results,
+        where={"cv_id": cv_id},
+    )
+    documents = results.get("documents") or []
+    if not documents or not documents[0]:
+        return []
+    return documents[0]
+
 
 DATABASE_PATH = Path(__file__).resolve().parent / "careerpilot.db"
 engine = create_engine(
@@ -172,6 +209,7 @@ async def upload_cv(file: UploadFile = File(...)):
 
     cv_id = str(uuid.uuid4())
     cv_store[cv_id] = cv_text
+    _index_cv_chunks(cv_id, cv_text)
 
     return {"cv_id": cv_id}
 
@@ -185,8 +223,16 @@ async def chat(request: ChatRequest):
     if not GEMINI_API_KEY:
         raise HTTPException(status_code=500, detail="GEMINI_API_KEY not set")
 
+    top_chunks = _retrieve_cv_chunks(request.cv_id, request.message)
+    relevant_cv = "\n\n".join(top_chunks)
+
     client = google_genai.Client(api_key=GEMINI_API_KEY)
-    full_prompt = f"You are a career assistant. The user's CV is: {cv_text}. Answer based on this CV only.\n\nUser question: {request.message}"
+    full_prompt = (
+        "You are a career assistant. "
+        f"Here are the most relevant parts of the user's CV: {relevant_cv}. "
+        "Answer based on this only. "
+        f"User question: {request.message}"
+    )
     response = client.models.generate_content(model="gemini-2.0-flash", contents=full_prompt)
     return {"reply": response.text}
 

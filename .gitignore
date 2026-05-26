@@ -1,2 +1,4 @@
-backend/.env__pycache__/
+backend/.env
+backend/chroma_data/
+__pycache__/
 *.pyc
