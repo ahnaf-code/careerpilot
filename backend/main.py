@@ -6,7 +6,8 @@ from typing import Dict
 from google import genai as google_genai
 import pdfplumber
 from dotenv import load_dotenv
-from fastapi import FastAPI, File, HTTPException, UploadFile
+import requests
+from fastapi import FastAPI, File, HTTPException, Query, UploadFile
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 
@@ -35,6 +36,32 @@ class ChatRequest(BaseModel):
 @app.get("/health")
 def health():
     return {"status": "ok"}
+
+
+@app.get("/api/jobs")
+def search_jobs(q: str = Query(default="")):
+    try:
+        response = requests.get(
+            "https://remotive.com/api/remote-jobs",
+            params={"search": q, "limit": 10},
+            timeout=10,
+        )
+        response.raise_for_status()
+    except requests.RequestException as exc:
+        raise HTTPException(status_code=502, detail="Failed to fetch jobs") from exc
+
+    data = response.json()
+    jobs = [
+        {
+            "title": job.get("title", ""),
+            "company": job.get("company_name", ""),
+            "url": job.get("url", ""),
+            "salary": job.get("salary", ""),
+            "location": job.get("candidate_required_location", ""),
+        }
+        for job in data.get("jobs", [])
+    ]
+    return {"jobs": jobs}
 
 
 @app.post("/api/upload-cv")
