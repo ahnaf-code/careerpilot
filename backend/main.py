@@ -1,4 +1,5 @@
 import io
+import json
 import os
 import uuid
 from datetime import datetime
@@ -56,6 +57,11 @@ Base.metadata.create_all(bind=engine)
 class ChatRequest(BaseModel):
     cv_id: str
     message: str
+
+
+class FitScoreRequest(BaseModel):
+    cv_id: str
+    job_description: str
 
 
 class TrackerCreate(BaseModel):
@@ -183,3 +189,28 @@ async def chat(request: ChatRequest):
     full_prompt = f"You are a career assistant. The user's CV is: {cv_text}. Answer based on this CV only.\n\nUser question: {request.message}"
     response = client.models.generate_content(model="gemini-2.0-flash", contents=full_prompt)
     return {"reply": response.text}
+
+
+@app.post("/api/fit-score")
+async def fit_score(request: FitScoreRequest):
+    cv_text = cv_store.get(request.cv_id)
+    if cv_text is None:
+        raise HTTPException(status_code=404, detail="CV not found")
+
+    if not GEMINI_API_KEY:
+        raise HTTPException(status_code=500, detail="GEMINI_API_KEY not set")
+
+    client = google_genai.Client(api_key=GEMINI_API_KEY)
+    prompt = (
+        f"Given this CV: {cv_text} and this job description: {request.job_description}, "
+        "compute a fit score from 0 to 100 based on how well the CV matches the job. "
+        'Return ONLY a JSON object like this: {"score": 75, "explanation": "one sentence reason"}'
+    )
+    response = client.models.generate_content(model="gemini-2.0-flash", contents=prompt)
+
+    try:
+        result = json.loads(response.text.strip())
+    except json.JSONDecodeError as exc:
+        raise HTTPException(status_code=502, detail="Invalid response from model") from exc
+
+    return {"score": result["score"], "explanation": result["explanation"]}
