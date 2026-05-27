@@ -3,8 +3,8 @@ import { saveApplication } from "../api"
 import Column from "./Column"
 
 function KanbanBoard({
-  cards,
-  setCards
+  cards = [],
+  setCards = () => {}
 }) {
 
   const [jobTitle, setJobTitle] =
