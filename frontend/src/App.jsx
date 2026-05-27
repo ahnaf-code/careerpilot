@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import Home from './Home';
 import Jobs from './Jobs';
 import Chat from './Chat';
-import KanbanBoard from './components/KanbanBoard';
+import Tracker from './Tracker';
 
 export default function App() {
   const [activeTab, setActiveTab] = useState('Home');
@@ -55,7 +55,7 @@ export default function App() {
           {activeTab === 'Home' && <Home onUploadSuccess={setCvId} />}
           {activeTab === 'Jobs' && <Jobs cvId={cvId} />}
           {activeTab === 'Chat' && <Chat cvId={cvId} />}
-          {activeTab === 'Tracker' && <KanbanBoard />}
+          {activeTab === 'Tracker' && <Tracker />}
         </div>
       </main>
     </div>
