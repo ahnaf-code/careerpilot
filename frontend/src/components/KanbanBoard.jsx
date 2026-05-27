@@ -2,10 +2,9 @@ import { useState } from "react"
 import { saveApplication } from "../api"
 import Column from "./Column"
 
-function KanbanBoard({
-  cards = [],
-  setCards = () => {}
-}) {
+function KanbanBoard() {
+
+  const [cards, setCards] = useState([])
 
   const [jobTitle, setJobTitle] =
     useState("")
