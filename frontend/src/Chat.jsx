@@ -37,7 +37,7 @@ export default function Chat({ cvId }) {
 
     try {
       // API Contract Endpoints: 2. Chat mapping config
-      const response = await fetch('/api/chat', {
+      const response = await fetch('http://localhost:8000/api/chat', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
