@@ -7,8 +7,18 @@ function CalendarView({ todos }) {
 
     if (view === "month") {
 
+      const year = date.getFullYear()
+
+      const month = String(
+        date.getMonth() + 1
+      ).padStart(2, "0")
+
+      const day = String(
+        date.getDate()
+      ).padStart(2, "0")
+
       const formattedDate =
-        date.toISOString().split("T")[0]
+        `${year}-${month}-${day}`
 
       const matchingTodos =
         todos.filter(
@@ -18,41 +28,42 @@ function CalendarView({ todos }) {
 
       if (matchingTodos.length > 0) {
 
+        const completedCount =
+          matchingTodos.filter(
+            (todo) => todo.completed
+          ).length
 
-  const completedCount =
-    matchingTodos.filter(
-      (todo) => todo.completed
-    ).length
+        const pendingCount =
+          matchingTodos.length -
+          completedCount
 
-  const pendingCount =
-    matchingTodos.length -
-    completedCount
+        return (
 
-  return (
+          <div className="calendar-indicators">
 
-    <div className="calendar-indicators">
+            {pendingCount > 0 && (
 
-      {pendingCount > 0 && (
+              <div className="pending-dot">
+                {pendingCount}
+              </div>
 
-        <div className="pending-dot">
-          {pendingCount}
-        </div>
+            )}
 
-      )}
+            {completedCount > 0 && (
 
-      {completedCount > 0 && (
+              <div className="completed-dot">
+                {completedCount}
+              </div>
 
-        <div className="completed-dot">
-          {completedCount}
-        </div>
+            )}
 
-      )}
+          </div>
 
-    </div>
-
-  )
-}
+        )
+      }
     }
+
+    return null
   }
 
   return (
@@ -69,6 +80,5 @@ function CalendarView({ todos }) {
 
   )
 }
-
 
 export default CalendarView
