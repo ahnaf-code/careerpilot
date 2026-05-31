@@ -20,7 +20,7 @@ export default function Jobs({ cvId }) {
 
     try {
       // API Contract Endpoints: 4. Job Search url param mapping
-      const response = await fetch(`/api/jobs?q=${encodeURIComponent(searchQuery)}`);
+      const response = await fetch(`http://localhost:8000/api/jobs?q=${encodeURIComponent(searchQuery)}`);
       if (!response.ok) throw new Error('Failed to fetch jobs');
       
       const data = await response.json();
@@ -56,7 +56,7 @@ export default function Jobs({ cvId }) {
 
     try {
       // API Contract Endpoints: 3. Fit Score
-      const response = await fetch('/api/fit-score', {
+      const response = await fetch('http://localhost:8000/api/fit-score', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
