@@ -23,10 +23,10 @@ export default function Home({ onUploadSuccess }) {
     setMessage('');
 
     const formData = new FormData();
-    formData.append('cv', file);
+    formData.append('file', file);
 
     try {
-      const response = await fetch('/api/upload-cv', {
+      const response = await fetch('http://localhost:8000/api/upload-cv', {
         method: 'POST',
         body: formData,
       });
