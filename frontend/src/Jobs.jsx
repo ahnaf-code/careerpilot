@@ -150,9 +150,14 @@ export default function Jobs({ cvId }) {
               </div>
 
               <div className="mt-6 pt-4 border-t border-gray-800/60 flex gap-2">
-                <button className="flex-1 bg-gray-800 hover:bg-gray-700 text-gray-200 text-xs font-medium py-2 rounded-lg transition-all">
+                <a 
+                  href={job.url} 
+                  target="_blank" 
+                  rel="noreferrer"
+                  className="flex-1 bg-gray-800 hover:bg-gray-700 text-gray-200 text-xs font-medium py-2 rounded-lg transition-all text-center"
+                >
                   View Details
-                </button>
+                </a>
                 <button 
                   onClick={() => handleGenerateCoverLetter(job)}
                   className="flex-1 bg-blue-600 hover:bg-blue-500 text-white text-xs font-medium py-2 rounded-lg transition-all shadow-sm"
