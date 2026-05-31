@@ -23,22 +23,22 @@ function StatsDashboard({ cards }) {
     ).length
 
   return (
-    <div className="grid grid-cols-4 gap-4 mb-6">
-      <div className="bg-blue-600 rounded-xl p-6 text-center">
-        <h3 className="text-4xl font-bold text-white">{appliedCount}</h3>
-        <p className="text-white font-medium mt-2">Applied</p>
+    <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: "16px", marginBottom: "24px" }}>
+      <div style={{ backgroundColor: "#2563eb", borderRadius: "12px", padding: "24px", textAlign: "center" }}>
+        <h3 style={{ fontSize: "36px", fontWeight: "bold", color: "white", margin: 0 }}>{appliedCount}</h3>
+        <p style={{ color: "white", fontWeight: "500", marginTop: "8px" }}>Applied</p>
       </div>
-      <div className="bg-yellow-500 rounded-xl p-6 text-center">
-        <h3 className="text-4xl font-bold text-white">{interviewCount}</h3>
-        <p className="text-white font-medium mt-2">Interviewing</p>
+      <div style={{ backgroundColor: "#eab308", borderRadius: "12px", padding: "24px", textAlign: "center" }}>
+        <h3 style={{ fontSize: "36px", fontWeight: "bold", color: "white", margin: 0 }}>{interviewCount}</h3>
+        <p style={{ color: "white", fontWeight: "500", marginTop: "8px" }}>Interviewing</p>
       </div>
-      <div className="bg-green-600 rounded-xl p-6 text-center">
-        <h3 className="text-4xl font-bold text-white">{offerCount}</h3>
-        <p className="text-white font-medium mt-2">Offers</p>
+      <div style={{ backgroundColor: "#16a34a", borderRadius: "12px", padding: "24px", textAlign: "center" }}>
+        <h3 style={{ fontSize: "36px", fontWeight: "bold", color: "white", margin: 0 }}>{offerCount}</h3>
+        <p style={{ color: "white", fontWeight: "500", marginTop: "8px" }}>Offers</p>
       </div>
-      <div className="bg-red-600 rounded-xl p-6 text-center">
-        <h3 className="text-4xl font-bold text-white">{rejectedCount}</h3>
-        <p className="text-white font-medium mt-2">Rejected</p>
+      <div style={{ backgroundColor: "#dc2626", borderRadius: "12px", padding: "24px", textAlign: "center" }}>
+        <h3 style={{ fontSize: "36px", fontWeight: "bold", color: "white", margin: 0 }}>{rejectedCount}</h3>
+        <p style={{ color: "white", fontWeight: "500", marginTop: "8px" }}>Rejected</p>
       </div>
     </div>
   )
