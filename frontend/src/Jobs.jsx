@@ -9,31 +9,8 @@ export default function Jobs({ cvId }) {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [modalContent, setModalContent] = useState({ role: '', company: '', text: '' });
 
-  // Job cards mock state matching the teammate's contract database schema layout
-  const [jobs, setJobs] = useState([
-    {
-      id: 1,
-      role: 'Machine Learning Intern',
-      company: 'Poridhi AI Labs',
-      location: 'Dhaka, Bangladesh (Hybrid)',
-      salary: '৳15,000 - ৳25,000 / month',
-      deadline: 'June 15, 2026',
-      fitScore: 88,
-      rawDescription: 'Looking for a Machine Learning Intern proficient in Python, PyTorch, and Data Preparation workflows to train core LLM pipelines.',
-      reasoning: 'Matches your uploaded CV profile perfectly on Python, PyTorch, and Data Cleaning. You lose points only because your resume lacks Docker experience mentioned in the job description.'
-    },
-    {
-      id: 2,
-      role: 'Junior Data Engineer',
-      company: 'TechGrowth Solutions',
-      location: 'Remote',
-      salary: '৳40,000 - ৳50,000 / month',
-      deadline: 'June 20, 2026',
-      fitScore: 55,
-      rawDescription: 'Seeking a Junior Data Engineer experienced in building live automated data pipelines using Apache Spark and AWS architecture frameworks.',
-      reasoning: 'Strong SQL background matches, but the role requires production experience with Apache Spark and AWS pipelines, which are currently missing from your resume milestones.'
-    }
-  ]);
+  // Job cards state initialized as an empty database array (No dummy data records remain)
+  const [jobs, setJobs] = useState([]);
 
   const handleSearch = async (e) => {
     e.preventDefault();
@@ -117,17 +94,10 @@ export default function Jobs({ cvId }) {
     }
   };
 
-  const getScoreColor = (score) => {
-    if (score >= 80) return 'bg-emerald-950/80 text-emerald-400 border-emerald-800';
-    if (score >= 60) return 'bg-amber-950/80 text-amber-400 border-amber-900';
-    return 'bg-rose-950/80 text-rose-400 border-rose-900';
-  };
-
   return (
     <div className="max-w-5xl mx-auto space-y-6">
-      {/* Search Input Control */}
+      {/* Search Input Control Container */}
       <div className="bg-gray-900 border border-gray-800 rounded-xl p-6 shadow-xl">
-        <h3 className="text-sm font-semibold text-white mb-3">Pillar 1: Agentic Job Hunter</h3>
         <form onSubmit={handleSearch} className="flex gap-3">
           <input
             type="text"
@@ -148,52 +118,57 @@ export default function Jobs({ cvId }) {
       </div>
 
       {/* Grid Render Frame */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        {jobs.map((job) => (
-          <div 
-            key={job.id} 
-            className="bg-gray-900 border border-gray-800 rounded-xl p-6 flex flex-col justify-between shadow-xl relative overflow-hidden group hover:border-gray-700 transition-all"
-          >
-            <div className={`absolute top-4 right-4 px-3 py-1 rounded-full text-xs font-bold border ${getScoreColor(job.fitScore)}`}>
-              {job.fitScore}% Fit Score
-            </div>
+      {jobs.length > 0 ? (
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          {jobs.map((job) => (
+            <div 
+              key={job.id || Math.random()} 
+              className="bg-gray-900 border border-gray-800 rounded-xl p-6 flex flex-col justify-between shadow-xl relative overflow-hidden group hover:border-gray-700 transition-all"
+            >
+              <div>
+                <h4 className="text-lg font-bold text-white group-hover:text-blue-400 transition-colors pr-4">
+                  {job.role}
+                </h4>
+                <p className="text-sm text-blue-400 font-medium mt-0.5">{job.company}</p>
+                
+                <div className="mt-4 grid grid-cols-2 gap-y-2 text-xs text-gray-400">
+                  <div className="flex items-center gap-1.5">📍 {job.location || 'N/A'}</div>
+                  <div className="flex items-center gap-1.5">💰 {job.salary || 'N/A'}</div>
+                  <div className="flex items-center gap-1.5">⏳ Deadline: {job.deadline || 'N/A'}</div>
+                </div>
 
-            <div>
-              <h4 className="text-lg font-bold text-white group-hover:text-blue-400 transition-colors pr-24">
-                {job.role}
-              </h4>
-              <p className="text-sm text-blue-400 font-medium mt-0.5">{job.company}</p>
-              
-              <div className="mt-4 grid grid-cols-2 gap-y-2 text-xs text-gray-400">
-                <div className="flex items-center gap-1.5">📍 {job.location}</div>
-                <div className="flex items-center gap-1.5">💰 {job.salary}</div>
-                <div className="flex items-center gap-1.5">⏳ Deadline: {job.deadline}</div>
+                {job.reasoning && (
+                  <div className="mt-5 bg-gray-950 border border-gray-800 rounded-lg p-3.5">
+                    <p className="text-xs font-semibold text-gray-300 flex items-center gap-1 mb-1">
+                      🧠 AI Agent Matching Reasoning:
+                    </p>
+                    <p className="text-xs text-gray-400 leading-relaxed">
+                      {job.reasoning}
+                    </p>
+                  </div>
+                )}
               </div>
 
-              <div className="mt-5 bg-gray-950 border border-gray-800 rounded-lg p-3.5">
-                <p className="text-xs font-semibold text-gray-300 flex items-center gap-1 mb-1">
-                  🧠 AI Agent Matching Reasoning:
-                </p>
-                <p className="text-xs text-gray-400 leading-relaxed">
-                  {job.reasoning}
-                </p>
+              <div className="mt-6 pt-4 border-t border-gray-800/60 flex gap-2">
+                <button className="flex-1 bg-gray-800 hover:bg-gray-700 text-gray-200 text-xs font-medium py-2 rounded-lg transition-all">
+                  View Details
+                </button>
+                <button 
+                  onClick={() => handleGenerateCoverLetter(job)}
+                  className="flex-1 bg-blue-600 hover:bg-blue-500 text-white text-xs font-medium py-2 rounded-lg transition-all shadow-sm"
+                >
+                  Draft Cover Letter
+                </button>
               </div>
             </div>
-
-            <div className="mt-6 pt-4 border-t border-gray-800/60 flex gap-2">
-              <button className="flex-1 bg-gray-800 hover:bg-gray-700 text-gray-200 text-xs font-medium py-2 rounded-lg transition-all">
-                View Details
-              </button>
-              <button 
-                onClick={() => handleGenerateCoverLetter(job)}
-                className="flex-1 bg-blue-600 hover:bg-blue-500 text-white text-xs font-medium py-2 rounded-lg transition-all shadow-sm"
-              >
-                Draft Cover Letter
-              </button>
-            </div>
-          </div>
-        ))}
-      </div>
+          ))}
+        </div>
+      ) : (
+        /* Empty Dashboard Informational State */
+        <div className="text-center py-12 border border-dashed border-gray-800 rounded-xl bg-gray-950/20">
+          <p className="text-sm text-gray-500">No jobs searched yet. Enter keywords above to query your live database stream.</p>
+        </div>
+      )}
 
       {/* Cover Letter Overlay Modal Panel */}
       {isModalOpen && (

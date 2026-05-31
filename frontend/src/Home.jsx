@@ -22,12 +22,10 @@ export default function Home({ onUploadSuccess }) {
     setUploading(true);
     setMessage('');
 
-    // Prepare form data to send the binary file
     const formData = new FormData();
     formData.append('cv', file);
 
     try {
-      // API Contract Endpoints: 1. Upload CV
       const response = await fetch('/api/upload-cv', {
         method: 'POST',
         body: formData,
@@ -37,16 +35,14 @@ export default function Home({ onUploadSuccess }) {
 
       const data = await response.json();
 
-      // Contract Check: Expects a response returning { cv_id }
       if (data && data.cv_id) {
-        onUploadSuccess(data.cv_id); // Save globally into App.jsx state
-        setMessage(`✅ CV uploaded and processed successfully! Assigned CV ID: ${data.cv_id}`);
+        onUploadSuccess(data.cv_id);
+        setMessage(`✅ CV uploaded successfully! Assigned CV ID: ${data.cv_id}`);
       } else {
         setMessage('⚠️ File received, but the backend did not return a valid "cv_id".');
       }
     } catch (error) {
-      console.error("Network error during file upload:", error);
-      // Fallback message confirming you attempted to stream the file payload to the endpoint
+      console.error(error);
       setMessage('📡 Request sent. Open your Browser Network Tab (F12) to verify the outgoing file stream to /api/upload-cv.');
     } finally {
       setUploading(false);
@@ -54,33 +50,26 @@ export default function Home({ onUploadSuccess }) {
   };
 
   return (
-    <div className="max-w-2xl mx-auto bg-gray-900 border border-gray-800 rounded-xl p-8 shadow-xl">
-      <h3 className="text-xl font-semibold text-white mb-2">Pillar 2: Profile & Resume Intelligence</h3>
-      <p className="text-sm text-gray-400 mb-6">
+    <div className="max-w-xl mx-auto bg-gray-900 border border-gray-800 rounded-xl p-8 shadow-xl text-center">
+      <p className="text-sm text-gray-400 mb-8">
         Upload your PDF or DOCX resume to initialize your Agentic profile layer.
       </p>
 
-      <form onSubmit={handleUpload} className="space-y-6">
-        {/* File Dropzone UI */}
-        <div className="flex items-center justify-center w-full">
-          <label className="flex flex-col items-center justify-center w-full h-48 border-2 border-dashed rounded-lg cursor-pointer bg-gray-950 border-gray-700 hover:border-blue-500 hover:bg-gray-900/50 transition-all">
-            <div className="flex flex-col items-center justify-center pt-5 pb-6 px-4 text-center">
-              <span className="text-4xl mb-3">📄</span>
-              <p className="mb-2 text-sm text-gray-300 font-medium">
-                {file ? `Selected: ${file.name}` : "Click to upload your CV"}
-              </p>
-              <p className="text-xs text-gray-500">PDF or DOCX (Max 5MB)</p>
-            </div>
-            <input 
-              type="file" 
-              className="hidden" 
-              accept=".pdf,.docx" 
-              onChange={handleFileChange} 
-            />
-          </label>
-        </div>
+      <form onSubmit={handleUpload} className="space-y-4 max-w-md mx-auto">
+        {/* Choose File Container Box */}
+        <label className="block w-full py-3 px-4 rounded-lg font-medium tracking-wide bg-gray-950 text-gray-200 border border-gray-700 hover:border-gray-500 hover:bg-gray-900 cursor-pointer text-center transition-all shadow-inner">
+          📂 {file ? `Selected: ${file.name}` : 'Choose File'}
+          <input 
+            type="file" 
+            style={{ display: 'none' }} 
+            accept=".pdf,.docx" 
+            onChange={handleFileChange} 
+          />
+        </label>
 
-        {/* Submit Button */}
+        <p className="text-xs text-gray-500 !mt-2">Supported formats: PDF or DOCX (Max 5MB)</p>
+
+        {/* Upload Action Container Box */}
         <button
           type="submit"
           disabled={uploading}
@@ -94,9 +83,9 @@ export default function Home({ onUploadSuccess }) {
         </button>
       </form>
 
-      {/* Feedback Message */}
+      {/* Feedback Alert Box */}
       {message && (
-        <div className={`mt-6 p-4 rounded-lg text-sm border ${
+        <div className={`mt-6 p-4 rounded-lg text-sm border text-left ${
           message.includes('✅') 
             ? 'bg-emerald-950/40 text-emerald-400 border-emerald-800' 
             : 'bg-amber-950/40 text-amber-400 border-amber-900'
