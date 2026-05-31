@@ -2,16 +2,20 @@ import { useState } from "react"
 import KanbanBoard from "./components/KanbanBoard"
 import TodoList from "./components/ToDolist"
 import CalendarView from "./components/CalendarView"
+import StatsDashboard from "./components/StatsDashboard"
 
 export default function Tracker() {
   const [view, setView] = useState("Kanban")
   const [todos, setTodos] = useState([])
+  const [cards, setCards] = useState([])
 
   const views = ["Kanban", "Todo", "Calendar"]
 
   return (
     <div>
-      <div style={{ display: "flex", gap: "10px", marginBottom: "20px" }}>
+      <StatsDashboard cards={cards} />
+
+      <div style={{ display: "flex", gap: "10px", margin: "20px 0" }}>
         {views.map((v) => (
           <button
             key={v}
@@ -27,7 +31,7 @@ export default function Tracker() {
         ))}
       </div>
 
-      {view === "Kanban" && <KanbanBoard />}
+      {view === "Kanban" && <KanbanBoard cards={cards} setCards={setCards} />}
       {view === "Todo" && <TodoList todos={todos} setTodos={setTodos} />}
       {view === "Calendar" && <CalendarView todos={todos} />}
     </div>
