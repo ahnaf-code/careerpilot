@@ -20,7 +20,7 @@ export default function App() {
       <aside className="w-64 bg-gray-900 border-r border-gray-800 flex flex-col justify-between shrink-0">
         <div className="p-6">
           <div className="flex items-center gap-2 mb-1">
-            <span className="text-2xl">🚀</span>
+            <span className="text-2xl">🤖</span>
             <h1 className="text-xl font-bold bg-gradient-to-r from-blue-400 to-purple-500 bg-clip-text text-transparent">
               CareerPilot
             </h1>
@@ -43,11 +43,12 @@ export default function App() {
             ))}
           </nav>
         </div>
-        <div className="p-4 border-t border-gray-800 text-center">
-          <p className="text-xs text-gray-600">Codesprint 2026</p>
-          <p className="text-xs text-gray-700">by Poridhi.io</p>
-        </div>
-      </aside>
+        <div className="p-4 border-t border-gray-800 text-center space-y-1">
+          <p className="text-xs font-semibold text-gray-500">⚡ RuntimeTerror</p>
+          <p className="text-xs text-gray-700">Azmain Ahnaf · Mahib Rahaman · Zunied Zia</p>
+          <p className="text-xs text-gray-600">v1.0.0</p>
+          </div>
+          </aside>
 
       <main className="flex-1 flex flex-col overflow-hidden">
         <header className="h-16 border-b border-gray-800 flex items-center px-8 bg-gray-900/50 backdrop-blur-sm justify-between shrink-0">
