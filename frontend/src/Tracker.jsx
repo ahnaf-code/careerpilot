@@ -10,7 +10,7 @@ export default function Tracker() {
   const [cards, setCards] = useState([])
 
   useEffect(() => {
-    fetch('http://localhost:8000/api/tracker')
+    fetch('https://careerpilot-backend-9by1.onrender.com/api/tracker')
       .then(res => res.json())
       .then(data => {
         if (data && data.applications) {

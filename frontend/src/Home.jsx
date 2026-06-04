@@ -26,7 +26,7 @@ export default function Home({ onUploadSuccess }) {
     formData.append('file', file);
 
     try {
-      const response = await fetch('http://localhost:8000/api/upload-cv', {
+      const response = await fetch('https://careerpilot-backend-9by1.onrender.com/api/upload-cv', {
         method: 'POST',
         body: formData,
       });

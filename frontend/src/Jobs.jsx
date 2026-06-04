@@ -22,7 +22,7 @@ export default function Jobs({ cvId }) {
 
     try {
       // API Contract Endpoints: 4. Job Search url param mapping
-      const response = await fetch(`http://localhost:8000/api/jobs?q=${encodeURIComponent(searchQuery)}`);
+      const response = await fetch(`https://careerpilot-backend-9by1.onrender.com/api/jobs?q=${encodeURIComponent(searchQuery)}`);
       if (!response.ok) throw new Error('Failed to fetch jobs');
       
       const data = await response.json();
@@ -45,7 +45,7 @@ export default function Jobs({ cvId }) {
     const jobKey = job.id || job.url;
     setFitLoading(prev => ({ ...prev, [jobKey]: true }));
     try {
-      const response = await fetch('http://localhost:8000/api/fit-score', {
+      const response = await fetch('https://careerpilot-backend-9by1.onrender.com/api/fit-score', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -86,7 +86,7 @@ export default function Jobs({ cvId }) {
 
     try {
       // API Contract Endpoints: 3. Fit Score
-      const response = await fetch('http://localhost:8000/api/chat', {
+      const response = await fetch('https://careerpilot-backend-9by1.onrender.com/api/chat', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
