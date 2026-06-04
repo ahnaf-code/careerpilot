@@ -9,6 +9,7 @@ from typing import Dict
 import chromadb
 from groq import Groq
 import pdfplumber
+from docx import Document
 from dotenv import load_dotenv
 import requests
 from fastapi import FastAPI, File, HTTPException, Query, UploadFile
@@ -199,21 +200,31 @@ def search_jobs(q: str = Query(default="")):
 
 @app.post("/api/upload-cv")
 async def upload_cv(file: UploadFile = File(...)):
-    if file.content_type != "application/pdf":
-        raise HTTPException(status_code=400, detail="Only PDF files are accepted")
+    allowed_types = [
+        "application/pdf",
+        "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+    ]
+    if file.content_type not in allowed_types:
+        raise HTTPException(status_code=400, detail="Only PDF or DOCX files are accepted")
 
     contents = await file.read()
     text_parts = []
 
-    with pdfplumber.open(io.BytesIO(contents)) as pdf:
-        for page in pdf.pages:
-            page_text = page.extract_text()
-            if page_text:
-                text_parts.append(page_text)
+    if file.content_type == "application/pdf":
+        with pdfplumber.open(io.BytesIO(contents)) as pdf:
+            for page in pdf.pages:
+                page_text = page.extract_text()
+                if page_text:
+                    text_parts.append(page_text)
+    else:
+        doc = Document(io.BytesIO(contents))
+        for para in doc.paragraphs:
+            if para.text.strip():
+                text_parts.append(para.text)
 
     cv_text = "\n".join(text_parts)
     if not cv_text.strip():
-        raise HTTPException(status_code=400, detail="Could not extract text from PDF")
+        raise HTTPException(status_code=400, detail="Could not extract text from file")
 
     cv_id = str(uuid.uuid4())
     cv_store[cv_id] = cv_text
