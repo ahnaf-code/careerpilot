@@ -1,4 +1,4 @@
-const BASE_URL = "http://localhost:8000";
+const BASE_URL = "https://careerpilot-backend-9by1.onrender.com";
 
 export async function uploadCV(file) {
   const formData = new FormData();
