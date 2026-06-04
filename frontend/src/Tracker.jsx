@@ -1,4 +1,4 @@
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import KanbanBoard from "./components/KanbanBoard"
 import TodoList from "./components/ToDolist"
 import CalendarView from "./components/CalendarView"
@@ -8,6 +8,16 @@ export default function Tracker() {
   const [view, setView] = useState("Kanban")
   const [todos, setTodos] = useState([])
   const [cards, setCards] = useState([])
+  useEffect(() => {
+  fetch('http://localhost:8000/api/tracker')
+    .then(res => res.json())
+    .then(data => {
+      if (data && data.applications) {
+        setCards(data.applications);
+      }
+    })
+    .catch(err => console.error('Failed to load tracker:', err));
+}, []);
 
   const views = ["Kanban", "Todo", "Calendar"]
 
