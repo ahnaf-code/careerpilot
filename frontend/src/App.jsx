@@ -41,7 +41,7 @@ export default function App() {
       </aside>
 
       {/* Main Content Window */}
-      <main className="flex-1 flex flex-col overflow-hidden bg-gray-950">
+      <main className="flex-1 flex flex-col overflow-auto bg-gray-950">
         <header className="h-16 border-b border-gray-800 flex items-center px-8 bg-gray-900/50 backdrop-blur-sm justify-between">
           <h2 className="text-lg font-semibold text-gray-200">{activeTab} Dashboard</h2>
           {cvId && (

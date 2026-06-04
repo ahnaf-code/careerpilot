@@ -50,7 +50,7 @@ export default function Jobs({ cvId }) {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           cv_id: cvId,
-          job_description: job.rawDescription || job.role + ' at ' + job.company
+          job_description: job.description || job.title + ' at ' + job.company || job.title + ' at ' + job.company
         }),
       });
       if (!response.ok) throw new Error('Fit score failed');
@@ -67,8 +67,9 @@ export default function Jobs({ cvId }) {
   const handleGenerateCoverLetter = async (job) => {
     // Open the visual modal container instantly for polished UX
     setIsModalOpen(true);
+    console.log("Modal state set to true, letterLoading:", letterLoading);
     setModalContent({
-      role: job.role,
+      role: job.title,
       company: job.company,
       text: ''
     });
@@ -93,7 +94,7 @@ export default function Jobs({ cvId }) {
         // Sends exact contract parameters payload: { cv_id, message }
         body: JSON.stringify({
           cv_id: cvId,
-          message: `Write a professional cover letter for the role of ${job.role} at ${job.company}. Use details from my CV to personalize it. Job description: ${job.rawDescription || job.role + ' at ' + job.company}`
+          message: `Write a professional cover letter for the role of ${job.title} at ${job.company}. Use details from my CV to personalize it. Job description: ${job.description || job.title + ' at ' + job.company || job.title + ' at ' + job.company}`
         }),
       });
 
@@ -102,10 +103,10 @@ export default function Jobs({ cvId }) {
       const data = await response.json();
 
       // Contract Check: Expects a response returning { response }
-      if (data && data.response) {
+      if (data && data.reply) {
         setModalContent(prev => ({
           ...prev,
-          text: data.response
+          text: data.reply
         }));
       } else {
         throw new Error('Missing data fields');
@@ -116,7 +117,7 @@ export default function Jobs({ cvId }) {
       // Fallback display template proving integration data architecture matching contract requirements
       setModalContent(prev => ({
         ...prev,
-        text: `📡 Frontend API call dispatched successfully!\n\nPayload sent:\n- cv_id: "${cvId}"\n- job_description: "${job.rawDescription}"\n\n[Fallback Cover Letter Template]\nDear Hiring Manager at ${job.company},\n\nI am thrilled to express my interest in the open ${job.role} role. Based on the profile analysis data tied to my profile token context, my matching background equips me well to step into your technical infrastructure immediately.\n\nThank you for your time,\nApplicant`
+        text: `📡 Frontend API call dispatched successfully!\n\nPayload sent:\n- cv_id: "${cvId}"\n- job_description: "${job.description || job.title + ' at ' + job.company}"\n\n[Fallback Cover Letter Template]\nDear Hiring Manager at ${job.company},\n\nI am thrilled to express my interest in the open ${job.title} role. Based on the profile analysis data tied to my profile token context, my matching background equips me well to step into your technical infrastructure immediately.\n\nThank you for your time,\nApplicant`
       }));
     } finally {
       setLetterLoading(false);
@@ -156,7 +157,7 @@ export default function Jobs({ cvId }) {
             >
               <div>
                 <h4 className="text-lg font-bold text-white group-hover:text-blue-400 transition-colors pr-4">
-                  {job.role}
+                  {job.title}
                 </h4>
                 <p className="text-sm text-blue-400 font-medium mt-0.5">{job.company}</p>
                 
@@ -241,7 +242,7 @@ export default function Jobs({ cvId }) {
             </div>
 
             {/* Modal Content Viewport */}
-            <div className="p-6 overflow-y-auto bg-gray-950/40 flex-1">
+            <div className="p-6 overflow-y-auto bg-gray-950/40 flex-1" ref={el => el && el.scrollTo(0, 0)}>
               {letterLoading ? (
                 <div className="flex flex-col items-center justify-center py-12 space-y-3">
                   <div className="h-6 w-6 border-2 border-blue-500 border-t-transparent rounded-full animate-spin"></div>
