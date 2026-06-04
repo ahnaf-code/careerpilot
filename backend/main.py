@@ -7,7 +7,7 @@ from pathlib import Path
 from typing import Dict
 
 import chromadb
-from google import genai as google_genai
+from groq import Groq
 import pdfplumber
 from dotenv import load_dotenv
 import requests
@@ -20,6 +20,7 @@ from sqlalchemy.orm import Session, declarative_base, sessionmaker
 load_dotenv()
 
 GEMINI_API_KEY = os.getenv("GEMINI_API_KEY")
+GROQ_API_KEY = os.getenv("GROQ_API_KEY")
 
 app = FastAPI()
 
@@ -226,15 +227,15 @@ async def chat(request: ChatRequest):
     top_chunks = _retrieve_cv_chunks(request.cv_id, request.message)
     relevant_cv = "\n\n".join(top_chunks)
 
-    client = google_genai.Client(api_key=GEMINI_API_KEY)
+    client = Groq(api_key=GROQ_API_KEY)
     full_prompt = (
         "You are a career assistant. "
         f"Here are the most relevant parts of the user's CV: {relevant_cv}. "
         "Answer based on this only. "
         f"User question: {request.message}"
     )
-    response = client.models.generate_content(model="gemini-2.0-flash", contents=full_prompt)
-    return {"reply": response.text}
+    response = client.chat.completions.create(model="llama-3.3-70b-versatile", messages=[{"role": "user", "content": full_prompt}])
+    return {"reply": response.choices[0].message.content}
 
 
 @app.post("/api/fit-score")
@@ -246,16 +247,16 @@ async def fit_score(request: FitScoreRequest):
     if not GEMINI_API_KEY:
         raise HTTPException(status_code=500, detail="GEMINI_API_KEY not set")
 
-    client = google_genai.Client(api_key=GEMINI_API_KEY)
+    client = Groq(api_key=GROQ_API_KEY)
     prompt = (
         f"Given this CV: {cv_text} and this job description: {request.job_description}, "
         "compute a fit score from 0 to 100 based on how well the CV matches the job. "
         'Return ONLY a JSON object like this: {"score": 75, "explanation": "one sentence reason"}'
     )
-    response = client.models.generate_content(model="gemini-2.0-flash", contents=prompt)
+    response = client.chat.completions.create(model="llama-3.3-70b-versatile", messages=[{"role": "user", "content": prompt}])
 
     try:
-        result = json.loads(response.text.strip())
+        result = json.loads(response.choices[0].message.content.strip())
     except json.JSONDecodeError as exc:
         raise HTTPException(status_code=502, detail="Invalid response from model") from exc
 
