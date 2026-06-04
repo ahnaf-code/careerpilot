@@ -166,10 +166,17 @@ def update_tracker_application(id: int, body: TrackerStatusUpdate):
 
 @app.get("/api/jobs")
 def search_jobs(q: str = Query(default="")):
+    rapidapi_key = os.getenv("RAPIDAPI_KEY")
+    if not rapidapi_key:
+        raise HTTPException(status_code=500, detail="RAPIDAPI_KEY not set")
     try:
         response = requests.get(
-            "https://remotive.com/api/remote-jobs",
-            params={"search": q, "limit": 10},
+            "https://jsearch.p.rapidapi.com/search",
+            headers={
+                "X-RapidAPI-Key": rapidapi_key,
+                "X-RapidAPI-Host": "jsearch.p.rapidapi.com",
+            },
+            params={"query": q if q.strip() else "software engineer", "num_pages": 1},
             timeout=10,
         )
         response.raise_for_status()
@@ -179,13 +186,13 @@ def search_jobs(q: str = Query(default="")):
     data = response.json()
     jobs = [
         {
-            "title": job.get("title", ""),
-            "company": job.get("company_name", ""),
-            "url": job.get("url", ""),
-            "salary": job.get("salary", ""),
-            "location": job.get("candidate_required_location", ""),
+            "title": job.get("job_title", ""),
+            "company": job.get("employer_name", ""),
+            "url": job.get("job_apply_link", ""),
+            "salary": "",
+            "location": f"{job.get('job_city', '')}, {job.get('job_country', '')}".strip(", "),
         }
-        for job in data.get("jobs", [])
+        for job in data.get("data", [])[:10]
     ]
     return {"jobs": jobs}
 
