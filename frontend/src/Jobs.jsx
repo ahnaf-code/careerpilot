@@ -11,6 +11,8 @@ export default function Jobs({ cvId }) {
 
   // Job cards state initialized as an empty database array (No dummy data records remain)
   const [jobs, setJobs] = useState([]);
+  const [fitScores, setFitScores] = useState({});
+  const [fitLoading, setFitLoading] = useState({});
 
   const handleSearch = async (e) => {
     e.preventDefault();
@@ -35,6 +37,33 @@ export default function Jobs({ cvId }) {
     }
   };
 
+  const handleFitScore = async (job) => {
+    if (!cvId) {
+      alert('Please upload your CV on the Home tab first.');
+      return;
+    }
+    const jobKey = job.id || job.url;
+    setFitLoading(prev => ({ ...prev, [jobKey]: true }));
+    try {
+      const response = await fetch('http://localhost:8000/api/fit-score', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          cv_id: cvId,
+          job_description: job.rawDescription || job.role + ' at ' + job.company
+        }),
+      });
+      if (!response.ok) throw new Error('Fit score failed');
+      const data = await response.json();
+      setFitScores(prev => ({ ...prev, [jobKey]: data.score }));
+    } catch (error) {
+      console.error('Fit score error:', error);
+      setFitScores(prev => ({ ...prev, [jobKey]: 'Error' }));
+    } finally {
+      setFitLoading(prev => ({ ...prev, [jobKey]: false }));
+    }
+  };
+
   const handleGenerateCoverLetter = async (job) => {
     // Open the visual modal container instantly for polished UX
     setIsModalOpen(true);
@@ -56,15 +85,15 @@ export default function Jobs({ cvId }) {
 
     try {
       // API Contract Endpoints: 3. Fit Score
-      const response = await fetch('http://localhost:8000/api/fit-score', {
+      const response = await fetch('http://localhost:8000/api/chat', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
-        // Sends exact contract parameters payload: { cv_id, job_description }
+        // Sends exact contract parameters payload: { cv_id, message }
         body: JSON.stringify({
           cv_id: cvId,
-          job_description: job.rawDescription
+          message: `Write a professional cover letter for the role of ${job.role} at ${job.company}. Use details from my CV to personalize it. Job description: ${job.rawDescription || job.role + ' at ' + job.company}`
         }),
       });
 
@@ -72,11 +101,11 @@ export default function Jobs({ cvId }) {
 
       const data = await response.json();
 
-      // Contract Check: Expects a response returning { score, explanation }
-      if (data && data.explanation) {
+      // Contract Check: Expects a response returning { response }
+      if (data && data.response) {
         setModalContent(prev => ({
           ...prev,
-          text: `Subject: Application for ${job.role} position at ${job.company}\n\nDear Hiring Team,\n\n${data.explanation}\n\nBest regards,\n[Your Name]`
+          text: data.response
         }));
       } else {
         throw new Error('Missing data fields');
@@ -137,6 +166,17 @@ export default function Jobs({ cvId }) {
                   <div className="flex items-center gap-1.5">⏳ Deadline: {job.deadline || 'N/A'}</div>
                 </div>
 
+                {fitScores[job.id || job.url] !== undefined && (
+                  <div className={`mt-4 inline-flex items-center gap-2 px-3 py-1.5 rounded-full text-xs font-bold ${
+                    fitScores[job.id || job.url] >= 70 ? 'bg-green-900/50 text-green-400 border border-green-700' :
+                    fitScores[job.id || job.url] >= 40 ? 'bg-yellow-900/50 text-yellow-400 border border-yellow-700' :
+                    'bg-red-900/50 text-red-400 border border-red-700'
+                  }`}>
+                    {fitScores[job.id || job.url] >= 70 ? '✅' : fitScores[job.id || job.url] >= 40 ? '⚡' : '⚠️'}
+                    Fit Score: {fitScores[job.id || job.url]}%
+                  </div>
+                )}
+
                 {job.reasoning && (
                   <div className="mt-5 bg-gray-950 border border-gray-800 rounded-lg p-3.5">
                     <p className="text-xs font-semibold text-gray-300 flex items-center gap-1 mb-1">
@@ -150,6 +190,13 @@ export default function Jobs({ cvId }) {
               </div>
 
               <div className="mt-6 pt-4 border-t border-gray-800/60 flex gap-2">
+                <button
+                  onClick={() => handleFitScore(job)}
+                  disabled={fitLoading[job.id || job.url]}
+                  className="flex-1 bg-emerald-700 hover:bg-emerald-600 disabled:bg-gray-800 disabled:text-gray-500 text-white text-xs font-medium py-2 rounded-lg transition-all shadow-sm"
+                >
+                  {fitLoading[job.id || job.url] ? 'Scoring...' : '🎯 Fit Score'}
+                </button>
                 <a 
                   href={job.url} 
                   target="_blank" 
