@@ -6,6 +6,11 @@ CareerPilot is an AI-powered career assistant that helps users manage their job 
 
 CareerPilot addresses the challenges job seekers face in managing multiple applications, tailoring their CVs for specific roles, and efficiently searching for relevant job opportunities. It streamlines the job application process by providing tools for tracking applications, intelligent job searching, and AI-driven CV analysis.
 
+## Architecture Diagram
+
+![Architecture Diagram](architecture_diagram.png)
+
+
 ## Tech Stack
 
 ### Frontend
@@ -148,6 +153,3 @@ Create a `.env` file in the `backend` directory with the following variables:
 
 Based on the project structure and common practices, the primary contributor is likely the author of the initial codebase. Specific contributors can be identified through git history.
 
-## Architecture Diagram
-
-![Architecture Diagram](architecture_diagram.png)
