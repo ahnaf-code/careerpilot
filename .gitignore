@@ -3,4 +3,4 @@ backend/chroma_data/
 __pycache__/
 *.pyc
 .env.local
-frontend/.env
+frontend/.env.DS_Store
