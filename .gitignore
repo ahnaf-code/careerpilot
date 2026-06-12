@@ -2,3 +2,5 @@ backend/.env
 backend/chroma_data/
 __pycache__/
 *.pyc
+.env.local
+frontend/.env
